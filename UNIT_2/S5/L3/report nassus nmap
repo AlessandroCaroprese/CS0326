@@ -1,0 +1,98 @@
+Ecco il report tecnico e strategico completo e unificato, che unisce le fasi di **Nmap** (identificazione dei servizi) e **Nessus** (rilevamento delle vulnerabilità), formattato secondo lo stile formale e accademico richiesto.
+
+---
+
+# Analisi delle Vulnerabilità Cyber: Valutazione di Sicurezza dell'Infrastruttura di Laboratorio
+
+**Anno Accademico:** 2025-2026
+
+**Documento redatto per:** Finalità di analisi strategica e accademica
+
+---
+
+### 1. Sintesi
+
+Il presente rapporto analizza lo stato di sicurezza e le vulnerabilità riscontrate all'interno dell'infrastruttura di rete del laboratorio. L'attività di sicurezza è stata strutturata in un processo sequenziale a due fasi: una prima ricognizione degli host e delle porte aperte tramite lo strumento di network scanning **Nmap**, seguita da una valutazione automatizzata approfondita del livello di minaccia tramite l'applicativo **Tenable Nessus** sul target `10.0.0.5` (Metasploitable). L'obiettivo del documento è delineare le principali falle del sistema (con particolare focus su quelle a impatto critico ed elevato) e proporre un framework di mitigazione tempestivo e resiliente basato sulle migliori pratiche del settore.
+
+### 2. Introduzione
+
+La trasformazione digitale e la modernizzazione dei sistemi informativi richiedono una costante verifica della superficie di attacco delle organizzazioni. La presenza di servizi legacy, software obsoleti o sistemi non configurati correttamente rappresenta il vettore primario per i data breach e le intrusioni informatiche. La cyber security è ormai passata dall'essere una mera funzione tecnica a un pilastro strategico della continuità operativa; pertanto, questa analisi valuta l'impatto sistemico delle vulnerabilità per prevenire compromissioni della rete aziendale.
+
+---
+
+### 3. Fase I: Ricognizione e Port Scanning (Nmap)
+
+Prima di procedere all'individuazione dei singoli difetti del software, è stata eseguita un'attività di impronta topologica (*footprinting*) mirata a mappare la superficie di attacco esposta dall'host target `10.0.0.5`.
+
+Dall'host d'attacco (Kali Linux), è stato lanciato il seguente comando di scansione sinottica:
+
+```bash
+nmap -sV -O 10.0.0.5
+
+```
+
+#### 3.1 Esito dell'Analisi Preliminare
+
+* **Assenza di Difese Perimetrali:** Nmap ha rilevato la totale assenza di meccanismi di filtraggio o protezione (Firewall o Intrusion Detection System), permettendo l'ispezione indiscriminata dei pacchetti.
+* **Fingerprinting del Sistema Operativo:** Il motore di rilevamento ha identificato con accuratezza il target come una macchina Unix-like basata su sistema operativo **Linux (versione Kernel 2.6.X)**.
+* **Mappatura dei Servizi attivi:** Sono state identificate molteplici porte aperte associate a demoni critici di rete, riassunte nella tabella seguente:
+
+| Porta / Protocollo | Stato | Servizio Rilevato | Descrizione e Funzione |
+| --- | --- | --- | --- |
+| **21 / TCP** | Aperta | FTP | Trasferimento file (demone *vsftpd*) |
+| **22 / TCP** | Aperta | SSH | Accesso remoto cifrato in linea di comando |
+| **80 / TCP** | Aperta | HTTP | Server Web attivo (demone *Apache*) |
+| **139, 445 / TCP** | Aperta | NetBIOS / SMB | Condivisione di file e risorse in rete (*Samba*) |
+| **5900 / TCP** | Aperta | VNC | Controllo remoto dell'interfaccia grafica |
+
+La mappatura accurata di queste porte ha fornito la base di conoscenza e i vettori d'ingresso ideali per la successiva fase di Vulnerability Assessment.
+
+---
+
+### 4. Fase II: Panorama delle Vulnerabilità Rilevate (Nessus)
+
+L'ispezione di dettaglio eseguita da Nessus sulle porte identificate da Nmap ha evidenziato una superficie di attacco estremamente compromessa. Il sistema presenta molteplici vulnerabilità catalogate come **Critical** (punteggio CVSS 9.8 - 10.0) e **High** (CVSS 7.5). Di seguito vengono analizzate le minacce di maggiore rilievo strategico:
+
+#### 4.1 Esposizione del Servizio VNC (CRITICAL - CVSS 10.0)
+
+Sulla porta `5900`, precedentemente mappata da Nmap, il servizio di controllo remoto VNC (Virtual Network Computing) è risultato affetto da gravi debolezze strutturali o dall'utilizzo di credenziali di default.
+
+* **Impatto:** Questa falla consente a un attaccante remoto di aggirare i meccanismi di autenticazione standard, garantendo un accesso diretto e interattivo al sistema ("Gain a shell remotely") con i massimi privilegi amministrativi.
+
+#### 4.2 Rilevamento di Backdoor: Bind Shell (CRITICAL - CVSS 9.8)
+
+È stata identificata una vulnerabilità critica legata alla presenza di una *Bind Shell* attiva in ascolto sul server.
+
+* **Impatto:** Tale falla indica che una porta del sistema fornisce un terminale di comando aperto a chiunque si connetta, senza richiedere alcuna forma di autenticazione o password. Rappresenta il massimo livello di compromissione del perimetro e della riservatezza.
+
+#### 4.3 Criticità nel Web Server Apache e SSL/TLS (CRITICAL - CVSS 9.8)
+
+Il server web Apache (rilevato sulla porta `80`) e i relativi moduli di cifratura SSL presentano versioni legacy non aggiornate.
+
+* **Impatto:** Espone il server a rischi di esecuzione di codice remoto (RCE) e attacchi mirati a provocare il Denial of Service (DoS), compromettendo la disponibilità pubblica dei servizi web dell'organizzazione.
+
+#### 4.4 Debolezze strutturali nel protocollo Samba (HIGH - CVSS 7.5)
+
+I servizi SMB/Samba attivi sulle porte `139` e `445` sono risultati vulnerabili a difetti di autenticazione, inclusa la nota falla della famiglia *Badlock*.
+
+* **Impatto:** Permette ad attori malintenzionati posizionati nello stesso segmento di rete di intercettare il traffico e sferrare attacchi di tipo *Man-in-the-Middle* (MitM), compromettendo l'integrità e la riservatezza dei dati scambiati.
+
+---
+
+### 5. Analisi dell'Impatto Sistemico
+
+Le vulnerabilità riscontrate non descrivono semplici difetti isolati, ma evidenziano una criticità strutturale dell'host analizzato. La combinazione di software non aggiornato e configurazioni errate (*misconfigurations*) permette la creazione di una catena di attacco (*Exploit Chain*).
+
+Un utente malintenzionato, partendo dallo scan iniziale di Nmap, è in grado di incrociare i dati e sfruttare i bug identificati da Nessus per ottenere il controllo totale (**Root**) della macchina nel giro di pochi minuti. Le conseguenze strategiche includono l'esfiltrazione di dati sensibili, la distruzione dei servizi o l'utilizzo dell'host come testa di ponte per muoversi lateralmente nella rete (pivot) verso altri sistemi critici.
+
+### 6. Strategie di Difesa e Best Practices
+
+Per elevare la postura di sicurezza e mitigare i rischi evidenziati, si rende necessaria l'implementazione delle seguenti contromisure basate su un approccio proattivo:
+
+* **Patch Management Tempestivo:** Aggiornamento immediato di tutti i demoni software obsoleti (Apache, Samba, VNC) all'ultima versione stabile e supportata dai rispettivi vendor per sanare i bug noti.
+* **Hardening e Disattivazione dei Servizi:** Chiusura immediata tramite regole di firewalling delle porte non strettamente necessarie alla produzione aziendale (rimozione drastica di VNC insicuri e interruzione dei processi legati alle Bind Shell).
+* **Segmentazione della Rete e Modello Zero Trust:** Implementazione di una strategia di micro-segmentazione per limitare la comunicazione interna ("East-West"). Ogni richiesta di comunicazione deve essere rigidamente autenticata, autorizzata e ispezionata.
+
+### 7. Conclusioni
+
+La cyber security non deve essere considerata come un prodotto statico, bensì come un processo aziendale continuo. L'infrastruttura analizzata presenta vulnerabilità severe che richiedono interventi di *remediation* prioritari ed immediati. Soltanto l'adozione di un framework di difesa proattivo, unito a costanti attività di Port Scanning (Nmap) e Vulnerability Assessment (Nessus), consentirà di garantire la resilienza informatica e la continuità operativa del business nel lungo periodo.
